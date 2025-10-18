@@ -1,6 +1,6 @@
-const express = require('express');
-const AddressController = require('../controllers/addressController');
+const express = require("express");
 const router = express.Router();
+const SupplierController = require("../controllers/supplierController");
 const jwt = require('jsonwebtoken');
 
 const authenticateToken = async (req, res, next) => {
@@ -18,9 +18,12 @@ const authenticateToken = async (req, res, next) => {
     }
 };
 
-router.get('/user/:userId', authenticateToken, AddressController.getUserAddresses);
-router.post('/', authenticateToken, AddressController.createAddress);
-router.put('/:addressId', authenticateToken, AddressController.updateAddress);
-router.delete('/:addressId', authenticateToken, AddressController.deleteAddress);
-router.put("/set-default/:address_id", authenticateToken, AddressController.setDefault);
+// 🔹 Route chính
+router.get("/", SupplierController.getAll);
+router.get("/:id", authenticateToken, SupplierController.getById);
+router.post("/", authenticateToken, SupplierController.create);
+router.put("/:id", authenticateToken, SupplierController.update);
+router.delete("/:id", authenticateToken, SupplierController.delete);
+
 module.exports = router;
+
