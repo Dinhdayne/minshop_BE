@@ -1,6 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const http = require('http');
+const { initSocket } = require('./socket');
+
+
+//require routes
 const accountRoutes = require('./routes/accountRoutes');
 const userRoutes = require('./routes/userRoutes');
 const customerRoutes = require('./routes/customerRoutes');
@@ -16,6 +21,9 @@ const addressRoutes = require('./routes/addressRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes');
 const purchaseRoutes = require('./routes/purchaseRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const couponRoutes = require('./routes/couponRoutes');
+const orderCouponRoutes = require('./routes/orderCouponRoutes');
 const { OAuth2Client } = require("google-auth-library");
 
 dotenv.config();
@@ -23,6 +31,17 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cors(
+    {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST", "PUT", "DELETE"],
+    }
+));
+app.use(express.json());
+// Tạo server HTTP để Socket.io có thể attach vào
+const server = http.createServer(app);
+// Khởi tạo Socket.io
+initSocket(server);
 
 // Routes
 app.use('/api', accountRoutes);
@@ -40,6 +59,9 @@ app.use('/api', orderRoutes);
 app.use('/api/statistics', statisticsRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/order-coupons', orderCouponRoutes);
 const client = new OAuth2Client("YOUR_GOOGLE_CLIENT_ID"); // lấy từ Google Console
 
 // Route xác thực Google
@@ -71,5 +93,10 @@ app.post("/auth/google", async (req, res) => {
         });
     }
 });
+
+
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server chạy trên port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`✅ Server + Socket.IO đang chạy trên port ${PORT}`);
+});
